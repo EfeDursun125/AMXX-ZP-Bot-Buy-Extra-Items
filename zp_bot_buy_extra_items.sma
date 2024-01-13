@@ -11,9 +11,12 @@
 
 new Array:ListOfExtraItemNames
 
+#define EXTRA_FREE "zp_bot_buy_extra_item_for_free"
+// https://github.com/EfeDursun125/AMXX-ZP-Bot-Buy-Extra-Items
+// use this to save bots ammo packs
+
 // not using cvar pointer because of the ram limit
 // also these are called less, not every time so don't worry
-#define EXTRA_FREE "zp_bot_buy_extra_item_for_free"
 #define EXTRA_TIME_MIN "zp_bot_buy_extra_item_time_min"
 #define EXTRA_TIME_MAX "zp_bot_buy_extra_item_time_max"
 public plugin_init()

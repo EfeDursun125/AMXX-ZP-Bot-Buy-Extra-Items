@@ -71,6 +71,10 @@ public bot_buy_extra_item(id)
 	ArrayGetString(ListOfExtraItemNames, random_num(0, ArraySize(ListOfExtraItemNames) - 1), name, EXTRA_ITEM_NAME_LENGTH)
 	zp_force_buy_extra_item(id, zp_get_extra_item_id(name), get_cvar_num(EXTRA_FREE))
 
+	// sometimes bots are happier now
+	if (random_num(1, 11) == 1)
+		client_cmd(id, "say i am happy with my %s", name)
+
 	// rarely get one more
 	if (random_num(1, 3) == 1)
 		set_task(random_float(get_cvar_float(EXTRA_TIME_MIN), get_cvar_float(EXTRA_TIME_MAX)), "bot_buy_extra_item", id + EXTRA_TASK_ID)

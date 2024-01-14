@@ -8,3 +8,4 @@ You can use this save plugin to save bots ammopacks: [Click HERE](https://github
 - zp_bot_buy_extra_item_for_free "0" // lets the bots buy extra items for free, no ammopacks required
 - zp_bot_buy_extra_item_time_min "10.0" // minimum delay after zp gamemode start
 - zp_bot_buy_extra_item_time_min "60.0" // maximum delay after zp gamemode start
+- zp_bot_buy_extra_item_list // lists the all detected extra items bots can buy

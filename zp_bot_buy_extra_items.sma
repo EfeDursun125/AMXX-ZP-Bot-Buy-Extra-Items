@@ -70,7 +70,7 @@ public bot_buy_extra_item(id)
 
 	new name[EXTRA_ITEM_NAME_LENGTH]
 	ArrayGetString(ListOfExtraItemNames, random_num(0, ArraySize(ListOfExtraItemNames) - 1), name, EXTRA_ITEM_NAME_LENGTH)
-	//zp_force_buy_extra_item(id, zp_get_extra_item_id(name), get_cvar_num(EXTRA_FREE))
+	zp_force_buy_extra_item(id, zp_get_extra_item_id(name), get_cvar_num(EXTRA_FREE))
 
 	// sometimes bots are happier now
 	if (random_num(1, 11) == 1)

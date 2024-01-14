@@ -4,7 +4,7 @@
 
 // define is not registered as *variable*
 // so it does not use ram, so use define instead of const
-#define PLUGIN_VERSION "0.1"
+#define PLUGIN_VERSION "0.2"
 #define EXTRA_ITEM_NAME_LENGTH 32
 #define EXTRA_ITEM_NAME_LENGTH_DOUBLE EXTRA_ITEM_NAME_LENGTH * 2
 #define EXTRA_TASK_ID 532
@@ -26,6 +26,7 @@ public plugin_init()
 	register_cvar(EXTRA_FREE, "0")
 	register_cvar(EXTRA_TIME_MIN, "10.0")
 	register_cvar(EXTRA_TIME_MAX, "60.0")
+	register_concmd("zp_bot_buy_extra_item_list", "cmd_list_extra", _, "Lists the all detected extra items bots can buy", 0)
 	load_data()
 }
 
@@ -69,7 +70,7 @@ public bot_buy_extra_item(id)
 
 	new name[EXTRA_ITEM_NAME_LENGTH]
 	ArrayGetString(ListOfExtraItemNames, random_num(0, ArraySize(ListOfExtraItemNames) - 1), name, EXTRA_ITEM_NAME_LENGTH)
-	zp_force_buy_extra_item(id, zp_get_extra_item_id(name), get_cvar_num(EXTRA_FREE))
+	//zp_force_buy_extra_item(id, zp_get_extra_item_id(name), get_cvar_num(EXTRA_FREE))
 
 	// sometimes bots are happier now
 	if (random_num(1, 11) == 1)
@@ -92,10 +93,17 @@ public load_data()
 	{
 		// are we using zpsp?
 		get_configsdir(path, charsmax(path))
-		formatex(path, charsmax(path), "%s/zpsp_configs/zpsp_extraitems.ini", path)
+		formatex(path, charsmax(path), "%s/zpsp_extraitems.ini", path)
 		file = fopen(path, "rt")
 		if (!file)
-			return
+		{
+			// latest version?
+			get_configsdir(path, charsmax(path))
+			formatex(path, charsmax(path), "%s/zpsp_configs/zpsp_extraitems.ini", path)
+			file = fopen(path, "rt")
+			if (!file)
+				return
+		}
 	}
 
 	new lineText[EXTRA_ITEM_NAME_LENGTH_DOUBLE], left[EXTRA_ITEM_NAME_LENGTH], right[EXTRA_ITEM_NAME_LENGTH]
@@ -111,7 +119,7 @@ public load_data()
 		strtok(lineText, left, EXTRA_ITEM_NAME_LENGTH_DOUBLE, right, EXTRA_ITEM_NAME_LENGTH, '=')
 		trim(left)
 
-		if (equal(left, "NAME") == -1)
+		if (!equal(left, "NAME"))
 			continue
 
 		trim(right)
@@ -119,4 +127,29 @@ public load_data()
 	}
 
 	fclose(file)
+}
+
+public cmd_list_extra(id, level, cid)
+{
+	if (!cmd_access(id, ADMIN_KICK, cid, 1))
+		return PLUGIN_HANDLED
+	
+	new size = ArraySize(ListOfExtraItemNames)
+	if (size <= 0)
+	{
+		console_print(id, "ERROR: NO EXTRA ITEMS FOUND!")
+		return PLUGIN_HANDLED
+	}
+
+	console_print(id, "^n^n---> Bot Buy Extra Items V%s^n-->", PLUGIN_VERSION)
+	
+	new i, temp[EXTRA_ITEM_NAME_LENGTH]
+	for (i = 0; i < size; i++)
+	{
+		ArrayGetString(ListOfExtraItemNames, i, temp, EXTRA_ITEM_NAME_LENGTH)
+		console_print(id, "--> %s", temp)
+	}
+
+	console_print(id, "-->^n---> Made by EfeDursun125^n^n")
+	return PLUGIN_HANDLED
 }

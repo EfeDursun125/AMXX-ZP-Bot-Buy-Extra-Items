@@ -4,12 +4,12 @@
 
 // define is not registered as *variable*
 // so it does not use ram, so use define instead of const
-#define PLUGIN_VERSION "0.2"
-#define EXTRA_ITEM_NAME_LENGTH 32
+#define PLUGIN_VERSION "0.3"
+#define EXTRA_ITEM_NAME_LENGTH 64
 #define EXTRA_ITEM_NAME_LENGTH_DOUBLE EXTRA_ITEM_NAME_LENGTH * 2
 #define EXTRA_TASK_ID 532
 
-new Array:ListOfExtraItemNames
+new Array:ListOfExtraItems
 
 #define EXTRA_FREE "zp_bot_buy_extra_item_for_free"
 // https://github.com/EfeDursun125/AMXX-ZP-Bot-Buy-Extra-Items
@@ -27,12 +27,16 @@ public plugin_init()
 	register_cvar(EXTRA_TIME_MIN, "10.0")
 	register_cvar(EXTRA_TIME_MAX, "60.0")
 	register_concmd("zp_bot_buy_extra_item_list", "cmd_list_extra", _, "Lists the all detected extra items bots can buy", 0)
+}
+
+public plugin_cfg()
+{
 	load_data()
 }
 
 public plugin_end()
 {
-	ArrayDestroy(ListOfExtraItemNames)
+	ArrayDestroy(ListOfExtraItems)
 }
 
 public zp_round_started(gamemode, id)
@@ -68,13 +72,7 @@ public bot_buy_extra_item(id)
 	if (!is_user_alive(id))
 		return
 
-	new name[EXTRA_ITEM_NAME_LENGTH]
-	ArrayGetString(ListOfExtraItemNames, random_num(0, ArraySize(ListOfExtraItemNames) - 1), name, EXTRA_ITEM_NAME_LENGTH)
-	zp_force_buy_extra_item(id, zp_get_extra_item_id(name), get_cvar_num(EXTRA_FREE))
-
-	// sometimes bots are happier now
-	if (random_num(1, 11) == 1)
-		client_cmd(id, "say i am happy with my %s", name)
+	zp_force_buy_extra_item(id, ArrayGetCell(ListOfExtraItems, random_num(0, ArraySize(ListOfExtraItems) - 1)), get_cvar_num(EXTRA_FREE))
 
 	// rarely get one more
 	if (random_num(1, 3) == 1)
@@ -83,7 +81,7 @@ public bot_buy_extra_item(id)
 
 public load_data()
 {
-	ListOfExtraItemNames = ArrayCreate(EXTRA_ITEM_NAME_LENGTH, 1)
+	ListOfExtraItems = ArrayCreate(1, 1)
 
 	new path[256]
 	get_configsdir(path, charsmax(path))
@@ -106,6 +104,7 @@ public load_data()
 		}
 	}
 
+	new id
 	new lineText[EXTRA_ITEM_NAME_LENGTH_DOUBLE], left[EXTRA_ITEM_NAME_LENGTH], right[EXTRA_ITEM_NAME_LENGTH]
 	while (!feof(file))
 	{
@@ -123,7 +122,9 @@ public load_data()
 			continue
 
 		trim(right)
-		ArrayPushString(ListOfExtraItemNames, right)
+		id = zp_get_extra_item_id(right)
+		if (id != -1)
+			ArrayPushCell(ListOfExtraItems, id)
 	}
 
 	fclose(file)
@@ -133,23 +134,62 @@ public cmd_list_extra(id, level, cid)
 {
 	if (!cmd_access(id, ADMIN_KICK, cid, 1))
 		return PLUGIN_HANDLED
-	
-	new size = ArraySize(ListOfExtraItemNames)
-	if (size <= 0)
+
+	console_print(id, "^n^n---> Bot Buy Extra Items V%s^n-->", PLUGIN_VERSION)
+
+	// if extra item id list is 0, we cannot write the extra item names
+	if (ArraySize(ListOfExtraItems) <= 0)
 	{
 		console_print(id, "ERROR: NO EXTRA ITEMS FOUND!")
 		return PLUGIN_HANDLED
 	}
 
-	console_print(id, "^n^n---> Bot Buy Extra Items V%s^n-->", PLUGIN_VERSION)
-	
-	new i, temp[EXTRA_ITEM_NAME_LENGTH]
-	for (i = 0; i < size; i++)
+	new path[256]
+	get_configsdir(path, charsmax(path))
+	formatex(path, charsmax(path), "%s/zp_extraitems.ini", path)
+	new file = fopen(path, "rt")
+	if (!file)
 	{
-		ArrayGetString(ListOfExtraItemNames, i, temp, EXTRA_ITEM_NAME_LENGTH)
-		console_print(id, "--> %s", temp)
+		// are we using zpsp?
+		get_configsdir(path, charsmax(path))
+		formatex(path, charsmax(path), "%s/zpsp_extraitems.ini", path)
+		file = fopen(path, "rt")
+		if (!file)
+		{
+			// latest version?
+			get_configsdir(path, charsmax(path))
+			formatex(path, charsmax(path), "%s/zpsp_configs/zpsp_extraitems.ini", path)
+			file = fopen(path, "rt")
+			if (!file)
+			{
+				console_print(id, "ERROR: NO EXTRA ITEMS FOUND!")
+				return PLUGIN_HANDLED
+			}
+		}
 	}
 
+	new id
+	new lineText[EXTRA_ITEM_NAME_LENGTH_DOUBLE], left[EXTRA_ITEM_NAME_LENGTH], right[EXTRA_ITEM_NAME_LENGTH]
+	while (!feof(file))
+	{
+		fgets(file, lineText, EXTRA_ITEM_NAME_LENGTH_DOUBLE)
+		replace(lineText, EXTRA_ITEM_NAME_LENGTH_DOUBLE, "^n", "")
+
+		if (!lineText[0] || lineText[0] == ';')
+			continue
+
+		trim(lineText)
+		strtok(lineText, left, EXTRA_ITEM_NAME_LENGTH_DOUBLE, right, EXTRA_ITEM_NAME_LENGTH, '=')
+		trim(left)
+
+		if (!equal(left, "NAME"))
+			continue
+
+		trim(right)
+		console_print(id, "--> %s", right)
+	}
+
+	fclose(file)
 	console_print(id, "-->^n---> Made by EfeDursun125^n^n")
 	return PLUGIN_HANDLED
 }

@@ -4,7 +4,7 @@
 
 // define is not registered as *variable*
 // so it does not use ram, so use define instead of const
-#define PLUGIN_VERSION "0.3"
+#define PLUGIN_VERSION "0.4"
 #define EXTRA_ITEM_NAME_LENGTH 64
 #define EXTRA_ITEM_NAME_LENGTH_DOUBLE EXTRA_ITEM_NAME_LENGTH * 2
 #define EXTRA_TASK_ID 532
@@ -72,11 +72,18 @@ public bot_buy_extra_item(id)
 	if (!is_user_alive(id))
 		return
 
-	zp_force_buy_extra_item(id, ArrayGetCell(ListOfExtraItems, random_num(0, ArraySize(ListOfExtraItems) - 1)), get_cvar_num(EXTRA_FREE))
-
-	// rarely get one more
-	if (random_num(1, 3) == 1)
-		set_task(random_float(get_cvar_float(EXTRA_TIME_MIN), get_cvar_float(EXTRA_TIME_MAX)), "bot_buy_extra_item", id + EXTRA_TASK_ID)
+	if (zp_force_buy_extra_item(id, ArrayGetCell(ListOfExtraItems, random_num(0, ArraySize(ListOfExtraItems) - 1)), get_cvar_num(EXTRA_FREE)))
+	{
+		// rarely get one more %33.333
+		if (random_num(1, 3) == 1)
+			set_task(random_float(get_cvar_float(EXTRA_TIME_MIN), get_cvar_float(EXTRA_TIME_MAX)), "bot_buy_extra_item", id + EXTRA_TASK_ID)
+	}
+	else
+	{
+		// try to buy something else %67.777
+		if (random_num(1, 3) != 1)
+			set_task(random_float(get_cvar_float(EXTRA_TIME_MIN), get_cvar_float(EXTRA_TIME_MAX)), "bot_buy_extra_item", id + EXTRA_TASK_ID)
+	}
 }
 
 public load_data()
@@ -135,8 +142,6 @@ public cmd_list_extra(id, level, cid)
 	if (!cmd_access(id, ADMIN_KICK, cid, 1))
 		return PLUGIN_HANDLED
 
-	console_print(id, "^n^n---> Bot Buy Extra Items V%s^n-->", PLUGIN_VERSION)
-
 	// if extra item id list is 0, we cannot write the extra item names
 	if (ArraySize(ListOfExtraItems) <= 0)
 	{
@@ -190,6 +195,5 @@ public cmd_list_extra(id, level, cid)
 	}
 
 	fclose(file)
-	console_print(id, "-->^n---> Made by EfeDursun125^n^n")
 	return PLUGIN_HANDLED
 }

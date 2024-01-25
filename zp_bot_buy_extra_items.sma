@@ -53,9 +53,6 @@ public zp_round_started(gamemode, id)
 		if (!is_user_bot(i))
 			continue
 
-		if (!is_user_alive(i))
-			continue
-
 		set_task(random_float(min, max), "bot_buy_extra_item", i + EXTRA_TASK_ID)
 	}
 }
@@ -63,14 +60,17 @@ public zp_round_started(gamemode, id)
 public bot_buy_extra_item(id)
 {
 	id -= EXTRA_TASK_ID
-	if (!is_user_connected(id))
+	if (!is_user_alive(id))
 		return
 
 	if (!is_user_bot(id))
 		return
 
-	if (!is_user_alive(id))
+	if (!zp_has_round_started())
+	{
+		set_task(random_float(get_cvar_float(EXTRA_TIME_MIN), get_cvar_float(EXTRA_TIME_MAX)), "bot_buy_extra_item", id + EXTRA_TASK_ID)
 		return
+	}
 
 	if (zp_force_buy_extra_item(id, ArrayGetCell(ListOfExtraItems, random_num(0, ArraySize(ListOfExtraItems) - 1)), get_cvar_num(EXTRA_FREE)))
 	{

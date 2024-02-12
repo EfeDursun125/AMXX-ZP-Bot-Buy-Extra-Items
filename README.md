@@ -1,7 +1,7 @@
 # Amx Mod X ZP Bot Buy Extra Items
 This amxmodx plugins allows to bots buy extra items on the zombie plague mode, it automatically reads the zp_extraitems.ini and stores the extra item names inside of the array, after zp gamemode started plugin let bots buy items with their ammopacks or for free (with cvar)
 
-You can use this save plugin to save bots ammopacks: [Click HERE](https://github.com/EfeDursun125/AMXX-ZP-Bot-Buy-Extra-Items)
+You can use this save plugin to save bots ammopacks: [Click HERE](https://github.com/EfeDursun125/AMXX-ZP-Save-Ammo-Packs-To-File)
 
 # CVars
 - zp_bot_buy_extra_item_version // shows the plugin version

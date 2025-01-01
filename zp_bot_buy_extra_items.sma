@@ -2,9 +2,7 @@
 #include <amxmisc>
 #include <zombieplague>
 
-// define is not registered as *variable*
-// so it does not use ram, so use define instead of const
-#define PLUGIN_VERSION "0.4"
+#define PLUGIN_VERSION "0.5"
 #define EXTRA_ITEM_NAME_LENGTH 64
 #define EXTRA_ITEM_NAME_LENGTH_DOUBLE EXTRA_ITEM_NAME_LENGTH * 2
 #define EXTRA_TASK_ID 532
@@ -15,8 +13,6 @@ new Array:ListOfExtraItems
 // https://github.com/EfeDursun125/AMXX-ZP-Bot-Buy-Extra-Items
 // use this to save bots ammo packs
 
-// not using cvar pointer because of the ram limit
-// also these are called less, not every time so don't worry
 #define EXTRA_TIME_MIN "zp_bot_buy_extra_item_time_min"
 #define EXTRA_TIME_MAX "zp_bot_buy_extra_item_time_max"
 public plugin_init()
@@ -59,6 +55,12 @@ public zp_round_started(gamemode, id)
 
 public bot_buy_extra_item(id)
 {
+	if (ArraySize(ListOfExtraItems) <= 0)
+	{
+		set_fail_state("ERROR: we failed to find extra items...")
+		return
+	}
+
 	id -= EXTRA_TASK_ID
 	if (!is_user_alive(id))
 		return
@@ -108,7 +110,7 @@ public load_data()
 			file = fopen(path, "rt")
 			if (!file)
 			{
-				set_fail_state("zp_extraitems.ini is not found, plugin works by reading zp_extraitems.ini | you can put latest copy of zp_extraitems.ini to configs folder, don't forget to update the copy when you add new extra items.")
+				set_fail_state("ERROR: zp_extraitems.ini is not found, plugin works by reading zp_extraitems.ini | you can put latest copy of zp_extraitems.ini to configs folder, don't forget to update the copy when you add new extra items.")
 				return
 			}
 		}
@@ -170,7 +172,7 @@ public cmd_list_extra(id, level, cid)
 			file = fopen(path, "rt")
 			if (!file)
 			{
-				console_print(id, "ERROR: NO EXTRA ITEMS FOUND!")
+				console_print(id, "ERROR: NO EXTRA ITEM INI FILE FOUND!")
 				return PLUGIN_HANDLED
 			}
 		}

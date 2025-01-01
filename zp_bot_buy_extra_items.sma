@@ -107,7 +107,10 @@ public load_data()
 			formatex(path, charsmax(path), "%s/zpsp_configs/zpsp_extraitems.ini", path)
 			file = fopen(path, "rt")
 			if (!file)
+			{
+				set_fail_state("zp_extraitems.ini is not found, plugin works by reading zp_extraitems.ini | you can put latest copy of zp_extraitems.ini to configs folder, don't forget to update the copy when you add new extra items.")
 				return
+			}
 		}
 	}
 
